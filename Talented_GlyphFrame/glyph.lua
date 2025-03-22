@@ -39,8 +39,12 @@ end
 
 local function Glyph_Update(self)
 	local id, group = self.id, self:GetParent().group
-	print(id, group)
-	local enabled, glyphType, glyphIndex, spell, icon = GetGlyphSocketInfo(id, group)
+	local enabled, glyphType, glyphIndex, spell, icon
+	if GetCVar('portal')=='CN' then
+		enabled, glyphType, glyphIndex, spell, icon = GetGlyphSocketInfo(id, group)
+	else
+		enabled, glyphType, spell, icon = GetGlyphSocketInfo(id, group)
+	end
 
 	self.highlight:Hide()
 	if not enabled then
