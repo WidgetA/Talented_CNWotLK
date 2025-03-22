@@ -25,6 +25,7 @@ function Talented:CheckSpellData(class)
 	if GetNumTalentTabs() < 1 then return end -- postpone checking without failing
 	local spelldata, tabdata  = self.spelldata[class], self.tabdata[class]
 	local invalid
+	local name, background
 	if #spelldata > GetNumTalentTabs() then
 		print("too many tabs", #spelldata, GetNumTalentTabs())
 		invalid = true
@@ -40,7 +41,11 @@ function Talented:CheckSpellData(class)
 			talents = {}
 			spelldata[tab] = talents
 		end
-		local name, _, _, background = GetTalentTabInfo(tab)
+		if GetCVar('portal')=='CN' then
+			_, name, _, _, _, background, _, _ = GetTalentTabInfo(tab)
+		else
+			name, _, _, background = GetTalentTabInfo(tab)
+		end
 		tabdata[tab].name = name -- no need to mark invalid for these
 		tabdata[tab].background = background
 		if #talents > GetNumTalents(tab) then

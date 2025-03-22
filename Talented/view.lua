@@ -65,8 +65,15 @@ end
 
 local function GetMaxPoints(...)
 	local total = 0
-	for i = 1, GetNumTalentTabs(...) do
-		total = total + select(3, GetTalentTabInfo(i, ...))
+	if GetCVar('portal')=='CN' then
+		for i = 1, GetNumTalentTabs(...) do
+			local _, _, _, _, point, _, _, _ = GetTalentTabInfo(i, ...)
+			total = total + point
+		end
+	else
+		for i = 1, GetNumTalentTabs(...) do
+			total = total + select(3, GetTalentTabInfo(i, ...))
+		end
 	end
 	return total + GetUnspentTalentPoints(...)
 end
@@ -277,7 +284,6 @@ function TalentView:Update()
 			clear:Show()
 		end
 	end
-
 	local maxpoints = GetMaxPoints(nil, nil, self.spec)
 	local points = self.frame.points
 	if points then

@@ -545,31 +545,126 @@ function Talented:GetDropdownFrame(frame)
 	return dropdown
 end
 
+local function InitializeMenu(self, menu, frame)
+    UIDropDownMenu_Initialize(self, function()
+        if UIDROPDOWNMENU_MENU_LEVEL == 1 then
+            for _, item in ipairs(menu) do
+                local info = UIDropDownMenu_CreateInfo()
+                info.text = item.colorCode and item.colorCode..item.text.."|r" or item.text
+                info.checked = item.checked
+                info.disabled = item.disabled
+                info.hasArrow = item.hasArrow
+                info.value = item
+                info.isTitle = item.isTitle or item.separator
+                info.notCheckable = (item.isTitle or item.separator) and true or not item.classicChecks
+                
+                if item.func then
+                    info.func = function()
+                        item.func(item, item.arg1, item.arg2)
+                        if not item.keepShownOnClick then
+                            CloseDropDownMenus()
+                        end
+                    end
+                end
+                
+                UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+            end
+        else
+            local parentItem = UIDROPDOWNMENU_MENU_VALUE
+            
+            if parentItem and parentItem.hasArrow and parentItem.menuList then
+                local subMenu
+                if type(parentItem.menuList) == "string" then
+                    subMenu = Talented.menus[parentItem.menuList]
+                else
+                    subMenu = parentItem.menuList
+                end
+                
+                if subMenu then
+                    for _, subItem in ipairs(subMenu) do
+                        if subItem.text then
+                            local info = UIDropDownMenu_CreateInfo()
+                            info.text = subItem.colorCode and subItem.colorCode..subItem.text.."|r" or subItem.text
+                            info.checked = subItem.checked
+                            info.disabled = subItem.disabled
+                            info.hasArrow = subItem.hasArrow
+                            info.value = subItem
+                            info.notCheckable = not subItem.classicChecks
+                            
+                            if subItem.func then
+                                info.func = function()
+                                    subItem.func(subItem, subItem.arg1, subItem.arg2)
+                                    if not subItem.keepShownOnClick then
+                                        CloseDropDownMenus()
+                                    end
+                                end
+                            end       
+                            UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+                        end
+                    end
+                end
+            end
+        end
+    end, "MENU")
+    
+    local xOffset = frame and frame.xOffset or 0
+    local yOffset = frame and frame.yOffset or 0
+    ToggleDropDownMenu(1, nil, self, frame, xOffset, yOffset)
+end
+
 function Talented:OpenTemplateMenu(frame)
-	EasyMenu(self:MakeTemplateMenu(), self:GetDropdownFrame(frame))
+	if GetCVar('portal')=='CN' then
+		if not self.dropdown then
+			self.dropdown = CreateFrame("Frame", "TalentedDropDown", nil, "UIDropDownMenuTemplate")
+		end
+		InitializeMenu(self.dropdown, self:MakeTemplateMenu(), frame)
+	else
+		EasyMenu(self:MakeTemplateMenu(), self:GetDropdownFrame(frame))
+	end
 end
 
 function Talented:OpenActionMenu(frame)
-	EasyMenu(self:MakeActionMenu(), self:GetDropdownFrame(frame))
+	if GetCVar('portal')=='CN' then
+		if not self.dropdown then
+			self.dropdown = CreateFrame("Frame", "TalentedDropDown", nil, "UIDropDownMenuTemplate")
+		end
+		InitializeMenu(self.dropdown, self:MakeActionMenu(), frame)
+	else
+		EasyMenu(self:MakeActionMenu(), self:GetDropdownFrame(frame))
+	end
 end
 
 function Talented:OpenRoleMenu(frame)
-	EasyMenu(self:MakeRoleMenu(), self:GetDropdownFrame(frame))
+	if GetCVar('portal')=='CN' then
+		if not self.dropdown then
+			self.dropdown = CreateFrame("Frame", "TalentedDropDown", nil, "UIDropDownMenuTemplate")
+		end
+		InitializeMenu(self.dropdown, self:MakeRoleMenu(), frame)
+	else
+		EasyMenu(self:MakeRoleMenu(), self:GetDropdownFrame(frame))
+	end
 end
 
 function Talented:OpenLockMenu(frame, parent)
-	local menu = self:GetNamedMenu("LockFrame")
-	local entry = menu[1]
-	if not entry then
-		entry = {
-			text = L["Lock frame"],
-			func = function (entry, frame)
-				Talented:SetFrameLock(frame, not entry.checked)
-			end,
-		}
-		menu[1] = entry
+	if not self.dropdown then
+        self.dropdown = CreateFrame("Frame", "TalentedDropDown", nil, "UIDropDownMenuTemplate")
+    end
+    local menu = self:GetNamedMenu("LockFrame")
+    local entry = menu[1]
+    if not entry then
+        entry = {
+            text = L["Lock frame"],
+            func = function (entry, frame)
+                Talented:SetFrameLock(frame, not entry.checked)
+            end,
+        }
+        menu[1] = entry
+    end
+    entry.arg1 = parent
+    entry.checked = self:GetFrameLock(parent)
+	if GetCVar('portal')=='CN' then
+		InitializeMenu(self.dropdown, menu, frame)
+	else
+		EasyMenu(menu, self:GetDropdownFrame(frame))
 	end
-	entry.arg1 = parent
-	entry.checked = self:GetFrameLock(parent)
-	EasyMenu(menu, self:GetDropdownFrame(frame))
 end

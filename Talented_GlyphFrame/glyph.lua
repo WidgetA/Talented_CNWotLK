@@ -39,7 +39,8 @@ end
 
 local function Glyph_Update(self)
 	local id, group = self.id, self:GetParent().group
-	local enabled, type, spell, icon = GetGlyphSocketInfo(id, group)
+	print(id, group)
+	local enabled, glyphType, glyphIndex, spell, icon = GetGlyphSocketInfo(id, group)
 
 	self.highlight:Hide()
 	if not enabled then
@@ -55,7 +56,7 @@ local function Glyph_Update(self)
 		self.background:Show()
 		self.ring:Show()
 
-		if type == 2 then -- minor
+		if glyphType == 2 then -- minor
 			self.setting:SetSize(86, 86)
 			self.setting:SetTexCoord(0.765625, 0.927734375, 0.15625, 0.31640625)
 

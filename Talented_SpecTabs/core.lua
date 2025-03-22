@@ -31,7 +31,11 @@ local function UpdateSpecInfo(info)
 			cache = {}
 			info.cache[i] = cache
 		end
-		local name, icon, points = GetTalentTabInfo(i, nil, pet, talentGroup)
+		if GetCVar('portal')=='CN' then
+			_, name, _, icon, points, _, _, _ = GetTalentTabInfo(i, nil, pet, talentGroup)
+		else
+			name, icon, points = GetTalentTabInfo(i, nil, pet, talentGroup)
+		end
 		cache.name, cache.icon, cache.points = name, icon, points
 		if points < min then
 			min = points
